@@ -15,7 +15,7 @@ const App: React.FC = () => {
   const [nativeLang, setNativeLang] = useState<Language>(Language.English);
   const [targetLang, setTargetLang] = useState<Language>(Language.Spanish);
   
-  const [currentView, setCurrentView] = useState<View>('search');
+  const [currentView, setCurrentView] = useState<View>('search');//currentView: 这是一个字符串。它决定了在主应用中，你是在“搜索”、“生词本”还是“复习”页面。
   
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -146,7 +146,7 @@ const App: React.FC = () => {
           onClick={() => setCurrentView('search')}
           className={`flex flex-col items-center gap-1 transition-colors ${currentView === 'search' ? 'text-indigo-600' : 'text-slate-400'}`}
         >
-          <Search size={24} strokeWidth={currentView === 'search' ? 3 : 2} />
+          <Search size={24} strokeWidth={currentView === 'search' ? 3 : 2} /> {/*当你在 search 页面时，图标线条会变粗（3），不在时则变细（2），这种细节增加了 UI 的精致感。*/}
           <span className="text-[10px] font-bold uppercase tracking-wide">Search</span>
         </button>
 
@@ -154,6 +154,7 @@ const App: React.FC = () => {
           onClick={() => setCurrentView('notebook')}
           className={`flex flex-col items-center gap-1 transition-colors ${currentView === 'notebook' ? 'text-indigo-600' : 'text-slate-400'}`}
         >
+          {/* 变色逻辑：代码会检查当前的 currentView 是否等于 'notebook'。 变成紫色 (Indigo)：如果判断为 真 (True)，则应用 text-indigo-600（一种深紫蓝色），让按钮看起来是"激活状态" */}
           <div className="relative">
             <Book size={24} strokeWidth={currentView === 'notebook' ? 3 : 2} />
             {notebook.length > 0 && (
