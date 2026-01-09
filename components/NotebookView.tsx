@@ -8,10 +8,11 @@ interface Props {
   entries: DictionaryEntry[];
   nativeLang: Language;
   targetLang: Language;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void;//源代码在app.tsx，在这里它只是接收了这个指令，并在用户点击垃圾桶图标时触发它。
+  isDark: boolean;
 }
 
-export const NotebookView: React.FC<Props> = ({ entries, nativeLang, targetLang, onDelete }) => {
+export const NotebookView: React.FC<Props> = ({ entries, nativeLang, targetLang, onDelete, isDark }) => {
   const [story, setStory] = useState<string | null>(null);
   const [loadingStory, setLoadingStory] = useState(false);
 
@@ -39,9 +40,9 @@ export const NotebookView: React.FC<Props> = ({ entries, nativeLang, targetLang,
   }
 
   return (
-    <div className="pb-24 p-4 max-w-2xl mx-auto">
+    <div className="pb-24 p-4 max-w-2xl mx-auto transition-colors duration-500">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-extrabold text-slate-800">My Notebook</h2>
+        <h2 className="text-3xl font-extrabold ${isDark ? 'text-white' : 'text-slate-800">My Notebook</h2>
         <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
           {entries.length} words
         </span>
@@ -86,17 +87,20 @@ export const NotebookView: React.FC<Props> = ({ entries, nativeLang, targetLang,
       {/* List */}
       <div className="space-y-4">
         {entries.map(entry => (
-          <div key={entry.id} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between group">
+          <div key={entry.id} className={`p-4 rounded-2xl shadow-sm border transition-all ${ isDark 
+              ? 'bg-slate-800 border-slate-700' 
+              : 'bg-white border-slate-100'} flex items-center justify-between group`}
+          >
             <div className="flex items-center gap-4">
               {entry.imageUrl && (
-                <img src={entry.imageUrl} alt="" className="w-12 h-12 rounded-lg object-cover bg-slate-100" />
+                <img src={entry.imageUrl} alt="" className={`w-12 h-12 rounded-lg object-cover ${isDark ? 'opacity-80' : 'bg-slate-100'}`} />
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-lg text-slate-900">{entry.term}</h4>
-                  <AudioButton text={entry.term} size={16} />
+                  <h4 className={`font-bold text-lg ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{entry.term}</h4>
+                  <AudioButton text={entry.term} size={16} isDark={isDark}/>
                 </div>
-                <p className="text-slate-500 text-sm line-clamp-1">{entry.definition}</p>
+                <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'} text-sm line-clamp-1`}>{entry.definition}</p>
               </div>
             </div>
             <button 
