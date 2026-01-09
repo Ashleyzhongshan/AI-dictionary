@@ -6,9 +6,10 @@ interface Props {
   text: string;
   className?: string;
   size?: number;
+  isDark?: boolean;
 }
 
-export const AudioButton: React.FC<Props> = ({ text, className = "", size = 20 }) => {
+export const AudioButton: React.FC<Props> = ({ text, className = "", size = 20, isDark }) => {
   const [loading, setLoading] = useState(false);
 
   const play = async () => {
@@ -38,7 +39,9 @@ export const AudioButton: React.FC<Props> = ({ text, className = "", size = 20 }
         play();
       }}
       disabled={loading}
-      className={`p-2 rounded-full bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors flex items-center justify-center ${className}`}
+      className={`p-2 rounded-full transition-colors ${
+        isDark ? 'bg-slate-700 text-slate-200 hover:bg-slate-600' : 'bg-indigo-100 text-indigo-600 hover:bg-indigo-200'
+      } ${className}`}
       title="Play pronunciation"
     >
       {loading ? <Loader2 size={size} className="animate-spin" /> : <Volume2 size={size} />}
