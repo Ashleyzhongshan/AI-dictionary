@@ -16,6 +16,7 @@ export const AudioButton: React.FC<Props> = ({ text, className = "", size = 20, 
     if (loading) return;
     setLoading(true);
     
+    //AI 返回的不是文字，而是一串由 0 和 1 组成的二进制流（Binary Data）。这串数据代表了声音的频率、振幅等物理信息。
     try {
       const buffer = await generateAudio(text);
       if (buffer) {
@@ -35,7 +36,7 @@ export const AudioButton: React.FC<Props> = ({ text, className = "", size = 20, 
   return (
     <button 
       onClick={(e) => {
-        e.stopPropagation();
+        e.stopPropagation();//这个按钮可能被放在一个“点击会翻转”的生词本卡片上。如果没有这一行，你点喇叭听声音时，整张卡片也会跟着翻转。加上这一行，点击就只会留在按钮本身。
         play();
       }}
       disabled={loading}

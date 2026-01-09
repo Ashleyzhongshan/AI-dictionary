@@ -135,8 +135,8 @@ export const generateStory = async (terms: string[], nativeLang: Language, targe
 
 // --- Audio Helpers ---
 
-function decode(base64: string) {
-  const binaryString = atob(base64);
+function decode(base64: string) { //AI 传输二进制数据时，通常会用 Base64 编码。它把 0 和 1 转换成一串长长的、看起来像乱码的英文字母。
+  const binaryString = atob(base64); //atob(base64) 把这串字母变回原本的字节数组（Uint8Array）。
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
@@ -158,7 +158,7 @@ async function decodeAudioData(
   for (let channel = 0; channel < numChannels; channel++) {
     const channelData = buffer.getChannelData(channel);
     for (let i = 0; i < frameCount; i++) {
-      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0; //16位音频的数据范围是 $-32768$ 到 $32767$。浏览器要求音频振幅必须在 $[-1.0, 1.0]$ 之间。如果不除以 $32768.0$，你的音箱可能会因为电流过载而发出刺耳的噪音！
     }
   }
   return buffer;
