@@ -1,3 +1,5 @@
+//React 的连接主要靠两个机制：Import（导入） 和 Props（属性传递）。
+
 import React, { useState, useEffect } from 'react';
 import { Language, DictionaryEntry } from './types';
 import { LanguageSelector } from './components/LanguageSelector';
@@ -13,7 +15,7 @@ const App: React.FC = () => {
   // --- State ---
   const [hasSetup, setHasSetup] = useState(false);
   const [nativeLang, setNativeLang] = useState<Language>(Language.English);
-  const [targetLang, setTargetLang] = useState<Language>(Language.Spanish);
+  const [targetLang, setTargetLang] = useState<Language>(Language.Mandarin);
   
   const [currentView, setCurrentView] = useState<View>('search');//currentView: 这是一个字符串。它决定了在主应用中，你是在“搜索”、“生词本”还是“复习”页面。
   
@@ -22,23 +24,25 @@ const App: React.FC = () => {
   const [searchResult, setSearchResult] = useState<DictionaryEntry | null>(null);
   
   const [notebook, setNotebook] = useState<DictionaryEntry[]>([]);
+  const [isDark, setIsDark] = useState(false); //默认是浅色模式
 
   // --- Handlers ---
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
+    e.preventDefault(); //HTML 表单默认提交后会刷新整个页面。这行代码拦截了这个默认行为，让页面不刷新，实现丝滑的单页体验。
+    if (!searchTerm.trim()) return; //如果用户只输入了空格或者啥也没输，直接结束函数，不浪费 API 额度。
 
-    setSearchLoading(true);
-    setSearchResult(null);
-    try {
-      const result = await lookupTerm(searchTerm, nativeLang, targetLang);
-      setSearchResult(result);
+    setSearchLoading(true); //开启加载状态：告诉大脑“开始干活了”，界面上对应的加载动画会因此转起来。
+    setSearchResult(null); //清空旧结果：在展示新单词前，先把上一个单词的结果藏起来，避免画面混乱。
+    //这是一个“保险箱”结构。try 里跑正常的逻辑，万一出事了（断网、API 挂了）就跳到 catch，无论成功还是失败，最后都会执行 finally。
+    try { 
+      const result = await lookupTerm(searchTerm, nativeLang, targetLang); //调用神经系统（Gemini）。await 表示：等到 AI 把结果送回来，再赋值给 result。
+      setSearchResult(result); //把拿到的果实存进大脑状态，触发 React 重新渲染，把卡片显示出来。
     } catch (error) {
       console.error(error);
       alert("Oops! Something went wrong trying to fetch that word. Try again?");
     } finally {
-      setSearchLoading(false);
+      setSearchLoading(false); //关闭加载状态：无论结果如何，活干完了，让小圈圈停止转动。
     }
   };
 
@@ -50,7 +54,7 @@ const App: React.FC = () => {
       return [entry, ...prev];
     });
   };
-
+  //
   const deleteFromNotebook = (id: string) => {
     setNotebook(prev => prev.filter(e => e.id !== id));
   };
@@ -70,13 +74,19 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className={`min-h-screen transition-colors duration-500 ${isDark ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`}>
       
       {/* Top Header (Sticky) */}
       <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <h1 className="text-xl font-black bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent">
           PopLingo
         </h1>
+        <button
+          onClick={() => setIsDark(!isDark)}
+          className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+          >
+            {isDark ? '🌙 Dark Mode' : '☀️ Light Mode'}
+          </button>
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
           <span>{targetLang}</span>
           <ArrowRight size={12} />
@@ -85,26 +95,34 @@ const App: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-md mx-auto min-h-screen">
+      <main className="max-w-2xl mx-auto w-full px-4 mb-8">
         
         {currentView === 'search' && (
-          <div className="p-4 pt-6 pb-24">
-             {/* Search Input */}
-             <form onSubmit={handleSearch} className="mb-8 relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={`Type a word in ${targetLang}...`}
-                className="w-full p-4 pr-12 rounded-2xl bg-white shadow-lg border-2 border-transparent focus:border-indigo-500 outline-none text-lg font-medium transition-all"
-              />
-              <button 
-                type="submit"
-                disabled={searchLoading}
-                className="absolute right-3 top-3 p-2 bg-indigo-600 text-white rounded-xl shadow-md hover:bg-indigo-700 disabled:bg-slate-300 transition-colors"
-              >
-                {searchLoading ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
-              </button>
+          <div className="space-y-8"> {/* 增加一个垂直间距容器 */}
+            {/* 搜索框：直接让 form 成为那个带背景和边框的矩形 */}
+            <form 
+              onSubmit={handleSearch} 
+              className={`flex items-center gap-2 p-2 rounded-2xl shadow-lg border transition-all duration-300 ${
+                isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'
+              }`}
+            >
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={`Type a word in ${targetLang}...`}
+                  className={`flex-1 px-4 py-3 bg-transparent outline-none text-xl font-medium ${
+                    isDark ? 'text-white placeholder:text-slate-500' : 'text-slate-900 placeholder:text-slate-400'
+                  }`}
+                />
+      
+                <button 
+                  type="submit"
+                  disabled={searchLoading}
+                  className="flex-shrink-0 p-4 bg-indigo-600 text-white rounded-xl shadow-md hover:bg-indigo-700 disabled:bg-slate-300 transition-colors"
+                >
+                  {searchLoading ? <Loader2 size={24} className="animate-spin" /> : <Search size={24} />}
+                </button>
             </form>
 
             {/* Results or Empty State */}
@@ -113,6 +131,7 @@ const App: React.FC = () => {
                 entry={searchResult} 
                 onSave={toggleSave}
                 isSaved={!!notebook.find(e => e.term === searchResult.term)}
+                isDark={isDark} //这一行是新加的，把状态传下去
               />
             )}
 
@@ -157,7 +176,7 @@ const App: React.FC = () => {
           {/* 变色逻辑：代码会检查当前的 currentView 是否等于 'notebook'。 变成紫色 (Indigo)：如果判断为 真 (True)，则应用 text-indigo-600（一种深紫蓝色），让按钮看起来是"激活状态" */}
           <div className="relative">
             <Book size={24} strokeWidth={currentView === 'notebook' ? 3 : 2} />
-            {notebook.length > 0 && (
+            {notebook.length > 0 && ( //在 React 的 JSX 语法中，{condition && <Component />} 被称为 短路逻辑渲染。
               <span className="absolute -top-1 -right-2 bg-pink-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                 {notebook.length}
               </span>

@@ -7,11 +7,14 @@ interface Props {
   entry: DictionaryEntry;
   onSave: (entry: DictionaryEntry) => void;
   isSaved: boolean;
+  isDark: boolean; // 👈 告诉组件，你会收到一个布尔值
 }
 
-export const ResultView: React.FC<Props> = ({ entry, onSave, isSaved }) => {
+export const ResultView: React.FC<Props> = ({ entry, onSave, isSaved, isDark }) => {
   return (
-    <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-24 animate-fade-in-up">
+    <div div className={`rounded-3xl shadow-xl overflow-hidden mb-24 animate-fade-in-up transition-colors duration-500 ${
+      isDark ? 'bg-slate-800 border border-slate-700' : 'bg-white'
+    }`}>
       {/* Image Header */}
       <div className="relative h-64 bg-slate-200 w-full overflow-hidden">
         {entry.imageUrl ? (
@@ -34,11 +37,11 @@ export const ResultView: React.FC<Props> = ({ entry, onSave, isSaved }) => {
       <div className="p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-2">
-          <h2 className="text-4xl font-extrabold text-slate-900">{entry.term}</h2>
+          <h2 className="text-4xl font-black bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">{entry.term}</h2>
           <AudioButton text={entry.term} size={28} className="bg-pink-100 text-pink-600 hover:bg-pink-200" />
         </div>
         
-        <p className="text-xl text-slate-600 mb-6 font-medium">{entry.definition}</p>
+        <p className="text-xl text-slate-600 mb-6 font-medium hover:translate-x-2 transition-all duration-300">{entry.definition}</p>
 
         {/* Usage Note */}
         <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl mb-8">
