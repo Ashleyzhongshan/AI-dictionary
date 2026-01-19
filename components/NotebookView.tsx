@@ -29,7 +29,8 @@ export const NotebookView: React.FC<Props> = ({ entries, nativeLang, targetLang,
     }
   };
 
-  if (entries.length === 0) {
+  //在ux中，这叫Empty State (空状态)，能有效防止用户在没存单词时看到一个白板而感到困惑。
+  if (entries.length === 0) { 
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center text-slate-400">
         <BookOpen size={64} className="mb-4 opacity-20" />
